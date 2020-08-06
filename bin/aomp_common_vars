@@ -18,7 +18,7 @@ AOMP_COMPILER_NAME=${AOMP_COMPILER_NAME:-AOMP}
 ROCM_VERSION=${ROCM_VERSION:-3.7.0}
 
 # Set the AOMP VERSION STRING and AOMP_PROJECT_REPO_BRANCH.
-AOMP_VERSION=${AOMP_VERSION:-"11.8"}
+AOMP_VERSION=${AOMP_VERSION:-"12.0"}
 AOMP_VERSION_MOD=${AOMP_VERSION_MOD:-"0"}
 AOMP_VERSION_STRING=${AOMP_VERSION_STRING:-"$AOMP_VERSION-$AOMP_VERSION_MOD"}
 export AOMP_VERSION_STRING AOMP_VERSION AOMP_VERSION_MOD ROCM_VERSION
@@ -29,10 +29,10 @@ AOMP=${AOMP:-$HOME/rocm/aomp}
 AOMP_INSTALL_DIR=${AOMP}_${AOMP_VERSION_STRING}
 
 # Set the directory location where all local AOMP git repos are stored.
-# For example, if AOMP_REPOS=$HOME/git/aomp11, then the primary aomp repo
-# is stored in $HOME/git/aomp11/aomp and the mono repo is stored in
+# For example, if AOMP_REPOS=$HOME/git/aomp12, then the primary aomp repo
+# is stored in $HOME/git/aomp12/aomp and the mono repo is stored in
 # $HOME/aomp/llvm-project.
-AOMP_REPOS=${AOMP_REPOS:-$HOME/git/aomp11}
+AOMP_REPOS=${AOMP_REPOS:-$HOME/git/aomp12}
 
 # Because the source for all repos are tarred for release, we store
 # all the test repositories in a different directory.
@@ -143,7 +143,7 @@ GITKHRONOS="https://github.com/KhronosGroup"
 AOMP_REPO_NAME=${AOMP_REPO_NAME:-aomp}
 AOMP_REPO_BRANCH=${AOMP_REPO_BRANCH:-amd-stg-openmp}
 AOMP_PROJECT_REPO_NAME=${AOMP_PROJECT_REPO_NAME:-amd-llvm-project}
-AOMP_PROJECT_REPO_BRANCH=${AOMP_PROJECT_REPO_BRANCH:-amd-stg-openmp}
+AOMP_PROJECT_REPO_BRANCH=${AOMP_PROJECT_REPO_BRANCH:-aomp12}
 AOMP_EXTRAS_REPO_NAME=${AOMP_EXTRAS_REPO_NAME:-aomp-extras}
 AOMP_EXTRAS_REPO_BRANCH=${AOMP_EXTRAS_REPO_BRANCH:-amd-stg-openmp}
 AOMP_FLANG_REPO_NAME=${AOMP_FLANG_REPO_NAME:-flang}
@@ -397,7 +397,7 @@ function help_build_aomp(){
   Repositories:
      Many repositories are used to build AOMP.  The script clone_aomp.sh will
      clone all the necessary repositories as subdirectories of the directory
-     $HOME/git/aomp11. The web repository locations and the required branches
+     $HOME/git/aomp12. The web repository locations and the required branches
      are set with the file aomp_common_vars
   
   Build all components:
@@ -430,7 +430,7 @@ function help_build_aomp(){
      NAME             DEFAULT             DESCRIPTION
      ----             -------             -----------
      AOMP             $HOME/rocm/aomp     Where the compiler will be installed
-     AOMP_REPOS       $HOME/git/aomp11    Location of all aomp repos
+     AOMP_REPOS       $HOME/git/aomp12    Location of all aomp repos
      BUILD_TYPE       Release             The CMAKE build type
      BUILD_AOMP       same as AOMP_REPOS  Set a different build location than AOMP_REPOS
   
