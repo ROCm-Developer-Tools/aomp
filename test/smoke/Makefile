@@ -15,6 +15,7 @@ TESTS_DIR = \
     decl_targ \
     devices \
     extern_init \
+    fast_math_undefined_symbol \
     firstprivate \
     firstprivate2 \
     flags \
