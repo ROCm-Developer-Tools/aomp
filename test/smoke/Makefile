@@ -71,6 +71,7 @@ TESTS_DIR = \
     reduction_teams_distribute_parallel \
     reduc_map_prob \
     schedule \
+    shared_library_oom \
     simd \
     slices \
     snap_red \
