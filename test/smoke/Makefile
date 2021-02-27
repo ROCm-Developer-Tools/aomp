@@ -25,6 +25,7 @@ TESTS_DIR = \
     flang_2regions \
     flang_blkdata-g \
     flang_char_kind \
+    flang_deviceio \
     flang_gen_sptr_prob \
     flang_isystem_prob \
     flang_klemm_map \
