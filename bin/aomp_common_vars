@@ -10,6 +10,11 @@
 #     The bash syntax ENVNAME=${ENVNAME:-value} checks if ENVNAME is
 #     already set. If not, it assigns it the value following the :-
 
+# Emit deprecated message for the amd-stg-openmp branch
+echo "The amd-stg-openmp branch has been deprecated. Development has moved to aomp-dev."
+echo "Exitting..."
+exit 1
+
 # The AOMP_COMPILER_NAME is used whenever version is queried.
 # FIXME: More work is needed to propogate the use of AOMP_COMPILER_NAME.
 AOMP_COMPILER_NAME=${AOMP_COMPILER_NAME:-AOMP}
