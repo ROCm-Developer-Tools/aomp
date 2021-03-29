@@ -9,6 +9,8 @@ aompdir="$(dirname "$parentdir")"
 
 set -x
 
+(cd $aompdir/bin ; git checkout aomp-dev )
+
 # we have a new Target memory manager appearing soon in aomp 12
 # it seems to either cause or reveal double  free or corruption
 # in lots of tests. This set to 0, disables the new TMM.
