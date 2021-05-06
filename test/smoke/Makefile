@@ -6,6 +6,7 @@ TESTS_DIR = \
     assertok_error \
     atomic \
     atomic_double \
+    clang-tracekernel \
     class \
     collapse \
     complex \
@@ -22,6 +23,16 @@ TESTS_DIR = \
     firstprivate \
     firstprivate2 \
     flags \
+    flang-272285 \
+    flang-272521 \
+    flang-272534 \
+    flang-272878 \
+    flang-273281 \
+    flang-273284 \
+    flang-274768 \
+    flang-274775 \
+    flang-274983 \
+    flang-275472 \
     flang_2regions \
     flang_blkdata-g \
     flang_char_kind \
@@ -36,8 +47,8 @@ TESTS_DIR = \
     flang_reduction_offload \
     flang_red_swdev-273281 \
     flang_red_swdev-273281-spmd \
-    flang-272730-complex \
     flang_tgt_alloc_ptr \
+    flang-tracekernel \
     function \
     function_overload \
     function_template \
@@ -45,7 +56,6 @@ TESTS_DIR = \
     global_allocate \
     helloworld \
     hip_device_compile \
-    hip_host_register \
     hip_rocblas \
     host_targ \
     issue_flang_libomp \
@@ -62,6 +72,7 @@ TESTS_DIR = \
     MasterBarrier \
     math_exp \
     math_flog \
+    math_max \
     math_modff \
     math_sqrt_float \
     MaxNumThrds \
@@ -96,12 +107,11 @@ TESTS_DIR = \
     slices \
     snap_red \
     stream \
+    targc-273738 \
     targ_declare \
-    targ_static \
     target-in-other-source \
-    target_teams_reduction \
     targets_in_loop \
-    tasks \
+    task-helper \
     taskwait_prob \
     teams \
     teams_nest \

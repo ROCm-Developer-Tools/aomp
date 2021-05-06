@@ -34,8 +34,9 @@ function cmake_warning(){
 
 # Setup AOMP variables
 AOMP=${AOMP:-/usr/lib/aomp}
-DETECTED_GPU=`$AOMP/bin/mygpu`
-AOMP_GPU=${AOMP_GPU:-$DETECTED_GPU}
+
+# Use function to set and test AOMP_GPU
+setaompgpu
 
 # Check cmake version
 cmake_regex="(([0-9])+\.([0-9]+)\.[0-9]+)"

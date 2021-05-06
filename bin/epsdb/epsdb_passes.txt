@@ -45,7 +45,6 @@ gdb_teams
 global_allocate
 helloworld
 hip_device_compile
-hip_rocblas
 host_targ
 issue_001
 issue_002
@@ -82,7 +81,6 @@ reduce
 reduc_map_prob
 reduction
 reduction_issue_16
-reduction_team
 reduction_teams
 reduction_teams_distribute_parallel
 schedule

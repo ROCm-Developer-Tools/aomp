@@ -27,13 +27,11 @@ thisdir=$(getdname $0)
 . $thisdir/aomp_common_vars
 # --- end standard header ----
 
-if [ -a $AOMP/bin/mygpu ]; then
-  export AOMP_GPU=`$AOMP/bin/mygpu`
-else
-  export AOMP_GPU=`$AOMP/../bin/mygpu`
-fi
+# Setup AOMP variables
+AOMP=${AOMP:-/usr/lib/aomp}
 
-echo AOMP_GPU = $AOMP_GPU
+# Use function to set and test AOMP_GPU
+setaompgpu
 
 cd $AOMP_REPOS_TEST/Nekbone
 cd test/nek_gpu1

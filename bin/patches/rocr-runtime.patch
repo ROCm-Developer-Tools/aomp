@@ -1,9 +1,8 @@
- ## Set the VERSION and SOVERSION values
 diff --git a/src/core/inc/amd_memory_region.h b/src/core/inc/amd_memory_region.h
-index f534261..1db6a98 100644
+index e119a93..f126457 100644
 --- a/src/core/inc/amd_memory_region.h
 +++ b/src/core/inc/amd_memory_region.h
-@@ -185,7 +185,11 @@ class MemoryRegion : public core::MemoryRegion {
+@@ -187,7 +187,11 @@ class MemoryRegion : public core::MemoryRegion {
  
    mutable KernelMutex access_lock_;
  
@@ -15,6 +14,91 @@ index f534261..1db6a98 100644
  
    // Determine access type allowed to requesting device
    hsa_amd_memory_pool_access_t GetAccessInfo(const core::Agent& agent,
+diff --git a/src/core/runtime/amd_aql_queue.cpp b/src/core/runtime/amd_aql_queue.cpp
+index 466afe2..a45fd75 100644
+--- a/src/core/runtime/amd_aql_queue.cpp
++++ b/src/core/runtime/amd_aql_queue.cpp
+@@ -246,6 +246,16 @@ AqlQueue::AqlQueue(GpuAgent* agent, size_t req_size_pkts, HSAuint32 node_id, Scr
+     HSA::hsa_signal_destroy(amd_queue_.queue_inactive_signal);
+   });
+ 
++  // Call SetCUMasking if there is a global cu mask
++  if (core::Runtime::runtime_singleton_->flag().has_global_cu_mask()) {
++     unsigned long int cu_mask_val =   // 8 byte copy
++       core::Runtime::runtime_singleton_->flag().global_cu_mask();
++     const uint32_t*cu_mask = (const uint32_t*) &cu_mask_val;
++     SetCUMasking(
++       core::Runtime::runtime_singleton_->flag().global_cu_mask_size(),
++       cu_mask);
++  }
++
+   if (core::g_use_interrupt_wait) {
+     ScopedAcquire<KernelMutex> _lock(&queue_lock_);
+     queue_count_++;
+diff --git a/src/core/runtime/hsa_ext_amd.cpp b/src/core/runtime/hsa_ext_amd.cpp
+index d65d0dc..38beacc 100644
+--- a/src/core/runtime/hsa_ext_amd.cpp
++++ b/src/core/runtime/hsa_ext_amd.cpp
+@@ -521,6 +521,9 @@ hsa_status_t hsa_amd_async_function(void (*callback)(void* arg), void* arg) {
+ hsa_status_t hsa_amd_queue_cu_set_mask(const hsa_queue_t* queue,
+                                                uint32_t num_cu_mask_count,
+                                                const uint32_t* cu_mask) {
++  // do not allow use of API when global cu mask is set
++  if (core::Runtime::runtime_singleton_->flag().has_global_cu_mask())
++    return(HSA_STATUS_ERROR);
+   TRY;
+   IS_OPEN();
+   IS_BAD_PTR(cu_mask);
+diff --git a/src/core/util/flag.h b/src/core/util/flag.h
+index 5013dd1..6967e8f 100644
+--- a/src/core/util/flag.h
++++ b/src/core/util/flag.h
+@@ -79,6 +79,21 @@ class Flag {
+     visible_gpus_ = os::GetEnvVar("ROCR_VISIBLE_DEVICES");
+     filter_visible_gpus_ = os::IsEnvVarSet("ROCR_VISIBLE_DEVICES");
+ 
++    global_cu_mask_str_ = os::GetEnvVar("ROCR_GLOBAL_CU_MASK");
++    has_global_cu_mask_  = os::IsEnvVarSet("ROCR_GLOBAL_CU_MASK");
++    if( has_global_cu_mask_) {
++      size_t pos = global_cu_mask_str_.find(":");
++      if ( pos != std::string::npos ) {
++	// Parse number and mask separated by :
++        global_cu_mask_size_ = (std::stoi(global_cu_mask_str_.substr(0,pos)))*32;
++        global_cu_mask_ = std::stoul(global_cu_mask_str_.substr(pos+1),nullptr,16);
++      } else {
++	// No delimiter, use default size
++        global_cu_mask_ = std::stoul(global_cu_mask_str_,nullptr,16);
++        global_cu_mask_size_ = 64;
++      }
++    }
++
+     var = os::GetEnvVar("HSA_RUNNING_UNDER_VALGRIND");
+     running_valgrind_ = (var == "1") ? true : false;
+ 
+@@ -164,6 +179,11 @@ class Flag {
+ 
+   bool filter_visible_gpus() const { return filter_visible_gpus_; }
+ 
++  std::string global_cu_mask_str() const { return global_cu_mask_str_; }
++  bool has_global_cu_mask() const { return has_global_cu_mask_; }
++  uint32_t global_cu_mask_size() const { return global_cu_mask_size_;}
++  unsigned long int global_cu_mask() const { return global_cu_mask_;}
++
+   uint32_t max_queues() const { return max_queues_; }
+ 
+   size_t scratch_mem_size() const { return scratch_mem_size_; }
+@@ -201,6 +221,11 @@ class Flag {
+   bool filter_visible_gpus_;
+   std::string visible_gpus_;
+ 
++  bool has_global_cu_mask_;
++  std::string global_cu_mask_str_;
++  uint32_t global_cu_mask_size_;
++  unsigned long int global_cu_mask_;
++
+   uint32_t max_queues_;
+ 
+   size_t scratch_mem_size_;
 diff --git a/src/core/util/utils.h b/src/core/util/utils.h
 index 29478f4..4a916e0 100644
 --- a/src/core/util/utils.h

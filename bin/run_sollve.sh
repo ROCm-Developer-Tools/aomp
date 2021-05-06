@@ -42,11 +42,11 @@ elif [ "$EPSDB" == "1" ]; then
   export AOMP=/opt/rocm/llvm
 fi
 
-if [ -a $AOMP/bin/mygpu ]; then
-  export AOMP_GPU=`$AOMP/bin/mygpu`
-else
-  export AOMP_GPU=`$AOMP/../bin/mygpu`
-fi
+# Setup AOMP variables
+AOMP=${AOMP:-/usr/lib/aomp}
+
+# Use function to set and test AOMP_GPU
+setaompgpu
 
 export MY_SOLLVE_FLAGS="-fopenmp -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdgcn-amd-amdhsa -march=$AOMP_GPU"
 

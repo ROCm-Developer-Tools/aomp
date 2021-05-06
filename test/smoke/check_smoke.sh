@@ -39,7 +39,7 @@ echo "                   A non-zero exit code means a failure occured." >> check
 echo "Tests that need to be visually inspected: devices, pfspecify, pfspecify_str, stream" >> check-smoke.txt
 echo "***********************************************************************************" >> check-smoke.txt
 
-known_fails="targ_static target_teams_reduction tasks simple_ctor flang_red_swdev-273281 math_exp flang-272730-complex"
+known_fails=""
 
 if [ "$SKIP_FAILURES" == 1 ] ; then
   skip_tests=$known_fails
@@ -49,73 +49,79 @@ fi
 
 #Loop over all directories and make run / make check depending on directory name
 for directory in ./*/; do
-    (cd "$directory" && path=$(pwd) && base=$(basename $path)
-    #Skip tests that are known failures
-    skip=0
-    for test in $skip_tests ; do
-      if [ $test == $base ] ; then
-        skip=1
-        break
-      fi
-    done
-    if [ $skip -ne 0 ] ; then
-      echo "Skip $base!"
-      echo ""
+  pushd $directory > /dev/null
+  path=$(pwd)
+  base=$(basename $path)
+  #Skip tests that are known failures
+  skip=0
+  for test in $skip_tests ; do
+    if [ $test == $base ] ; then
+      skip=1
+      break
+    fi
+  done
+  if [ $skip -ne 0 ] ; then
+    echo "Skip $base!"
+    echo ""
+    popd > /dev/null
+    continue
+  fi
+  newest_rocm=$(ls /opt | grep -e "rocm-[0-9].[0-9].[0-9]" | tail -1)
+  AOMPROCM=${AOMPROCM:-/opt/"$newest_rocm"}
+  if [ $base == 'hip_rocblas' ] ; then
+    ls $AOMPROCM/rocblas > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+      echo -e "$RED"$base - needs rocblas installed at $AOMPROCM/rocblas:"$BLK"
+      echo -e "$RED"$base - ROCBLAS NOT FOUND!!! SKIPPING TEST!"$BLK"
+      popd > /dev/null
       continue
     fi
-    AOMPROCM=${AOMPROCM:-/opt/rocm}
-    if [ $base == 'hip_rocblas' ] ; then
-      ls $AOMPROCM/rocblas > /dev/null 2>&1
-      if [ $? -ne 0 ]; then
-        echo -e "$RED"$base - needs rocblas installed at $AOMPROCM/rocblas:"$BLK"
-        echo -e "$RED"$base - ROCBLAS NOT FOUND!!! SKIPPING TEST!"$BLK"
-        continue
-      fi
+  fi
+  if [ $base == 'devices' ] || [ $base == 'pfspecifier' ] || [ $base == 'pfspecifier_str' ] || [ $base == 'stream' ] ; then
+    make
+    if [ $? -ne 0 ]; then
+      echo "$base: Make Failed" >> ../make-fail.txt
     fi
-    if [ $base == 'devices' ] || [ $base == 'pfspecifier' ] || [ $base == 'pfspecifier_str' ] || [ $base == 'stream' ] ; then
-      make
-      if [ $? -ne 0 ]; then
-        echo "$base: Make Failed" >> ../make-fail.txt
-      fi
-      make run > /dev/null 2>&1
-      make check > /dev/null 2>&1
+    make run > /dev/null 2>&1
+    make check > /dev/null 2>&1
 
-    #flags has multiple runs
-    elif [ $base == 'flags' ] ; then
-      make
-      make run > /dev/null 2>&1
-    elif [ $base == 'printf_parallel_for_target' ] ; then
-      make verify-log
-    else
-      make
-      if [ $? -ne 0 ]; then
-        echo "$base: Make Failed" >> ../make-fail.txt
-      fi
-      make check > /dev/null 2>&1
-      #liba_bundled has an additional Makefile, that may fail on the make check
-      if [ $? -ne 0 ] && ( [ $base == 'liba_bundled' ] || [ $base == 'liba_bundled_cmdline' ] ) ; then
-        echo "$base: Make Failed" >> ../make-fail.txt
-      fi
+  #flags has multiple runs
+  elif [ $base == 'flags' ] ; then
+    make
+    make run > /dev/null 2>&1
+  elif [ $base == 'printf_parallel_for_target' ] ; then
+    make verify-log
+  else
+    make
+    if [ $? -ne 0 ]; then
+      echo "$base: Make Failed" >> ../make-fail.txt
     fi
-    echo ""
-   )
-	
+    make check > /dev/null 2>&1
+    #liba_bundled has an additional Makefile, that may fail on the make check
+    if [ $? -ne 0 ] && ( [ $base == 'liba_bundled' ] || [ $base == 'liba_bundled_cmdline' ] ) ; then
+      echo "$base: Make Failed" >> ../make-fail.txt
+    fi
+  fi
+  echo ""
+  popd > /dev/null
 done
 
 #Print run.log for all tests that need visual inspection
 for directory in ./*/; do
-  (cd "$directory" && path=$(pwd) && base=$(basename $path)
-    if [ $base == 'devices' ] || [ $base == 'pfspecifier' ] || [ $base == 'pfspecifier_str' ] || [ $base == 'stream' ] ; then
-      echo ""
-      echo -e "$ORG"$base - Run Log:"$BLK"
-      echo "--------------------------"
-      if [ -e run.log ]; then
-        cat run.log
-      fi
-      echo ""
-      echo ""
+  pushd $directory > /dev/null
+  path=$(pwd)
+  base=$(basename $path)
+  if [ $base == 'devices' ] || [ $base == 'pfspecifier' ] || [ $base == 'pfspecifier_str' ] || [ $base == 'stream' ] ; then
+    echo ""
+    echo -e "$ORG"$base - Run Log:"$BLK"
+    echo "--------------------------"
+    if [ -e run.log ]; then
+      cat run.log
     fi
-  )
+    echo ""
+    echo ""
+  fi
+  popd > /dev/null
 done
 
 #Replace false positive return codes with 'Check the run.log' so that user knows to visually inspect those.

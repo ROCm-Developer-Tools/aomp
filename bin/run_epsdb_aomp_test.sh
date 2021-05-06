@@ -9,19 +9,36 @@ aompdir="$(dirname "$parentdir")"
 
 set -x
 
+(cd $aompdir/bin ; git checkout aomp-dev )
+
 # we have a new Target memory manager appearing soon in aomp 12
 # it seems to either cause or reveal double  free or corruption
 # in lots of tests. This set to 0, disables the new TMM.
-export LIBOMPTARGET_MEMORY_MANAGER_THRESHOLD=0
+#export LIBOMPTARGET_MEMORY_MANAGER_THRESHOLD=0
 
 export AOMPROCM=$AOMP/..
 
+
+# Try using rocm_agent_enumerator for device id.
+# Use bogus path to avoid using target.lst, a user-defined target list
+# used by rocm_agent_enumerator.
+export ROCM_TARGET_LST=/opt/nowhere
+echo "RAE devices:"
+$AOMPROCM/bin/rocm_agent_enumerator
+
+# Regex skips first result 'gfx000' and selects second id.
+export AOMP_GPU=$($AOMPROCM/bin/rocm_agent_enumerator | grep -m 1 -E gfx[^0]{1}.{2})
+
 # mygpu will eventually relocate to /opt/rocm/bin, support both cases for now.
-if [ -a $AOMP/bin/mygpu ]; then
-  export AOMP_GPU=`$AOMP/bin/mygpu`
-#  export EXTRA_OMP_FLAGS=--rocm-path=$AOMP/
+if [ "$AOMP_GPU" != "" ]; then
+  echo "AOMP_GPU set with rocm_agent_enumerator."
 else
-  export AOMP_GPU=`$AOMP/../bin/mygpu`
+  echo "AOMP_GPU is empty, use mygpu."
+  if [ -a $AOMP/bin/mygpu ]; then
+    export AOMP_GPU=$($AOMP/bin/mygpu)
+  else
+    export AOMP_GPU=$($AOMP/../bin/mygpu)
+  fi
 fi
 
 echo AOMP_GPU = $AOMP_GPU
@@ -40,6 +57,11 @@ cd $aompdir/test/smoke/helloworld
 make clean
 OMP_TARGET_OFFLOAD=MANDATORY VERBOSE=1 make run > hello.log 2>&1
 tail -10 hello.log
+
+echo "====== smoke-fails ======="
+cd $aompdir/test/smoke-fails
+OMP_TARGET_OFFLOAD=MANDATORY ./check_smoke_fails.sh > smoke-fails.log 2>&1
+tail -34 smoke-fails.log
 
 echo "====== smoke ======="
 cd $aompdir/test/smoke

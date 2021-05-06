@@ -10,6 +10,9 @@
 #     The bash syntax ENVNAME=${ENVNAME:-value} checks if ENVNAME is
 #     already set. If not, it assigns it the value following the :-
 
+# Emit deprecated message for the amd-stg-openmp branch
+echo "The amd-stg-openmp branch has been deprecated. Development has moved to aomp-dev."
+
 # The AOMP_COMPILER_NAME is used whenever version is queried.
 # FIXME: More work is needed to propogate the use of AOMP_COMPILER_NAME.
 AOMP_COMPILER_NAME=${AOMP_COMPILER_NAME:-AOMP}
@@ -76,9 +79,13 @@ AOMP_CXX_COMPILER=${AOMP_CXX_COMPILER:-$GCCXX}
 # Non standalone builds are done with ROCm builds.
 AOMP_STANDALONE_BUILD=${AOMP_STANDALONE_BUILD:-1}
 
-#  The logic for turning on CUDA build is here
-# temporarily turn off all cuda builds
-AOMP_BUILD_CUDA=0
+#  The logic for turning on AOMP_BUILD_CUDA build is here
+if [ "$AOMP_PROC" == "ppc64le" ] ; then
+   AOMP_BUILD_CUDA=1
+   AOMP_STANDALONE_BUILD=1
+else
+   AOMP_BUILD_CUDA=0
+fi
 if [ $AOMP_STANDALONE_BUILD == 1 ] ; then
    # Default is to build nvptx for STANDALONE build
    AOMP_BUILD_CUDA=${AOMP_BUILD_CUDA:-1}
@@ -139,7 +146,7 @@ NUM_THREADS=
 if [ ! -z `which "getconf"` ]; then
    NUM_THREADS=$(`which "getconf"` _NPROCESSORS_ONLN)
    if [ "$AOMP_PROC" == "ppc64le" ] ; then
-      NUM_THREADS=8
+      NUM_THREADS=$(( NUM_THREADS / 6))
    fi
    if [ "$AOMP_PROC" == "aarch64" ] ; then
       NUM_THREADS=$(( NUM_THREADS / 4))
@@ -203,19 +210,21 @@ AOMP_REPO_BRANCH=${AOMP_REPO_BRANCH:-amd-stg-openmp}
 
 #  These extra repositories are needed but we cannot update them
 AOMP_ROCT_REPO_NAME=${AOMP_ROCT_REPO_NAME:-roct-thunk-interface}
-AOMP_ROCT_REPO_BRANCH=${AOMP_ROCT_REPO_BRANCH:-roc-4.0.x}
+AOMP_ROCT_REPO_BRANCH=${AOMP_ROCT_REPO_BRANCH:-roc-4.1.x}
 AOMP_ROCT_COMPONENT_NAME=${AOMP_ROCT_COMPONENT_NAME:-roct}
 AOMP_ROCR_REPO_NAME=${AOMP_ROCR_REPO_NAME:-rocr-runtime}
-AOMP_ROCR_REPO_BRANCH=${AOMP_ROCR_REPO_BRANCH:-rocm-4.0.0}
+AOMP_ROCR_REPO_BRANCH=${AOMP_ROCR_REPO_BRANCH:-rocm-4.1.x}
 AOMP_ROCR_COMPONENT_NAME=${AOMP_ROCR_COMPONENT_NAME:-rocr}
 AOMP_LIBDEVICE_REPO_NAME=${AOMP_LIBDEVICE_REPO_NAME:-rocm-device-libs}
 AOMP_LIBDEVICE_COMPONENT_NAME=${AOMP_LIBDEVICE_COMPONENT_NAME:-rocdl}
 if [ "$AOMP_MAJOR_VERSION" == "12" ] ; then
-AOMP_LIBDEVICE_REPO_BRANCH=${AOMP_LIBDEVICE_REPO_BRANCH:-amd-stg-open}
+  AOMP_LIBDEVICE_REPO_BRANCH=${AOMP_LIBDEVICE_REPO_BRANCH:-amd-stg-open}
+  AOMP_LIBDEVICE_REPO_SHA="f16f5b1b90a21943306b87e160654b5738c8a884"
 elif [ "$AOMP_MAJOR_VERSION" == "13" ] ; then
-AOMP_LIBDEVICE_REPO_BRANCH=${AOMP_LIBDEVICE_REPO_BRANCH:-amd-stg-open}
+  AOMP_LIBDEVICE_REPO_BRANCH=${AOMP_LIBDEVICE_REPO_BRANCH:-amd-stg-open}
+  AOMP_LIBDEVICE_REPO_SHA="5c5f64ef02ebebcdb6ed81e1af076dcf37a9de8a"
 else
-AOMP_LIBDEVICE_REPO_BRANCH=${AOMP_LIBDEVICE_REPO_BRANCH:-rocm-3.10.x}
+  AOMP_LIBDEVICE_REPO_BRANCH=${AOMP_LIBDEVICE_REPO_BRANCH:-rocm-3.10.x}
 fi
 DEVICELIBS_ROOT=${DEVICELIBS_ROOT:-$AOMP_REPOS/$AOMP_LIBDEVICE_REPO_NAME}
 AOMP_COMGR_REPO_NAME=${AOMP_COMGR_REPO_NAME:-rocm-compilersupport}
@@ -230,25 +239,27 @@ AOMP_RINFO_REPO_BRANCH=${AOMP_RINFO_REPO_BRANCH:-master}
 
 # These are repos we will use when we switch to HIP VDI
 AOMP_VDI_REPO_NAME=${AOMP_VDI_REPO_NAME:-vdi}
-AOMP_VDI_REPO_BRANCH=${AOMP_VDI_REPO_BRANCH:-rocm-4.0.x}
+AOMP_VDI_REPO_BRANCH=${AOMP_VDI_REPO_BRANCH:-rocm-4.1.x}
 AOMP_VDI_REPO_GITNAME=${AOMP_VDI_REPO_GITNAME:-ROCclr}
 AOMP_OCL_REPO_NAME=${AOMP_OCL_REPO_NAME:-opencl-on-vdi}
 AOMP_OCL_REPO_GITNAME=${AOMP_OCL_REPO_GITNAME:-ROCm-OpenCL-Runtime}
-AOMP_OCL_REPO_BRANCH=${AOMP_OCL_REPO_BRANCH:-rocm-4.0.x}
+AOMP_OCL_REPO_BRANCH=${AOMP_OCL_REPO_BRANCH:-rocm-4.1.x}
 AOMP_HIPVDI_REPO_NAME=${AOMP_HIPVDI_REPO_NAME:-hip-on-vdi}
 AOMP_HIPVDI_REPO_GITNAME=${AOMP_HIPVDI_REPO_GITNAME:-hip}
-AOMP_HIPVDI_REPO_BRANCH=${AOMP_HIPVDI_REPO_BRANCH:-rocm-4.0.x}
+AOMP_HIPVDI_REPO_BRANCH=${AOMP_HIPVDI_REPO_BRANCH:-rocm-4.1.x}
 
 # These are needed when AOMP_BUILD_DEBUG=1
 AOMP_GDB_REPO_NAME=${AOMP_GDB_REPO_NAME:-ROCgdb}
-AOMP_GDB_REPO_BRANCH=${AOMP_GDB_REPO_BRANCH:-rocm-4.0.x}
+AOMP_GDB_REPO_BRANCH=${AOMP_GDB_REPO_BRANCH:-rocm-4.1.x}
 AOMP_DBGAPI_REPO_NAME=${AOMP_DBGAPI_REPO_NAME:-ROCdbgapi}
-AOMP_DBGAPI_REPO_BRANCH=${AOMP_DBGAPI_REPO_BRANCH:-rocm-4.0.x}
+AOMP_DBGAPI_REPO_BRANCH=${AOMP_DBGAPI_REPO_BRANCH:-rocm-4.1.x}
+#FIXME: 4.1 branches for rocprof/roctracer are incorrect
 AOMP_PROF_REPO_NAME=${AOMP_PROF_REPO_NAME:-rocprofiler}
-AOMP_PROF_REPO_BRANCH=${AOMP_PROF_REPO_BRANCH:-rocm-4.0.x}
+AOMP_PROF_REPO_BRANCH=${AOMP_PROF_REPO_BRANCH:-amd-master}
+AOMP_PROF_REPO_SHA=${AOMP_RINFO_REPO_SHA:-8cd086e}
 AOMP_TRACE_REPO_NAME=${AOMP_TRACE_REPO_NAME:-roctracer}
-AOMP_TRACE_REPO_BRANCH=${AOMP_TRACE_REPO_BRANCH:-rocm-4.0.x}
-
+AOMP_TRACE_REPO_BRANCH=${AOMP_TRACE_REPO_BRANCH:-amd-master}
+AOMP_TRACE_REPO_SHA=${AOMP_RINFO_REPO_SHA:-fb0c230}
 # These are test repositories
 GITNEKBONE="https://github.com/AMDComputeLibraries"
 AOMP_NEKBONE_REPO_NAME=${AOMP_NEKBONE_REPO_NAME:-Nekbone}
@@ -369,6 +380,7 @@ if [ "$AOMP_APPLY_ROCM_PATCHES" == 1 ] && [ -d "$patchdir" ] ; then
      getpatchlist
    fi
 
+   echo !!!!!!!!!!!!!!!patches: $patches
    #loop through list of patches to apply
    if [ "$patches" != "" ] ; then
    patchloc=${AOMP_PATCH_CONTROL_FILE%/*}
@@ -450,8 +462,11 @@ function getpatchlist(){
    else
      reporegex="(^$basedir:\s)"
    fi
+   echo FILE: $AOMP_PATCH_CONTROL_FILE
+   echo regex $reporegex
    #read patch control file and look for correct patches
    while read -r line; do
+   echo ------------$line
    if [[ "$line" =~ $reporegex ]]; then
      #remove basename from list of patches
      patches=${line/"${BASH_REMATCH[1]}"}
@@ -459,6 +474,30 @@ function getpatchlist(){
      break
    fi
    done < "$AOMP_PATCH_CONTROL_FILE"
+}
+
+function setaompgpu (){
+  if [[ "$AOMP" =~ "opt" ]]; then
+    echo Set AOMP_GPU with rocm_agent_enumerator.
+    detected_gpu=$($AOMP/../bin/rocm_agent_enumerator | grep -m 1 -E gfx[^0]{1}.{2})
+  else
+    echo Set AOMP_GPU with mygpu.
+    if [ -a $AOMP/bin/mygpu ]; then
+      detected_gpu=$($AOMP/bin/mygpu)
+    else
+      detected_gpu=$($AOMP/../bin/mygpu)
+    fi
+  fi
+
+  AOMP_GPU=${AOMP_GPU:-$detected_gpu}
+  export AOMP_GPU
+  echo AOMP_GPU = $AOMP_GPU
+  echo AOMP     = $AOMP
+
+  if [ "$AOMP_GPU" == "" ] || [ "$AOMP_GPU" == "unknown" ]; then
+    echo Error: AOMP_GPU not properly set...exiting.
+    exit 1
+  fi
 }
 
 function help_build_aomp(){

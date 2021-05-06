@@ -167,6 +167,12 @@ fi
 
 echo
 echo " -----Running make ---- " 
+
+# Workaround for race condition in the build of compiler-rt
+for prebuild in $(make help | sed -n '/-version-list/s/^... //p') ; do
+  make -j$NUM_THREADS $prebuild
+done
+
 echo make -j $NUM_THREADS 
 make -j $NUM_THREADS 
 if [ $? != 0 ] ; then 
@@ -176,14 +182,9 @@ fi
 
 if [ "$1" == "install" ] ; then
    echo " -----Installing to $INSTALL_PROJECT ---- " 
-   $SUDO make install 
+   $SUDO make -j $NUM_THREADS install 
    if [ $? != 0 ] ; then 
       echo "ERROR make install failed "
-      exit 1
-   fi
-   $SUDO make install/local
-   if [ $? != 0 ] ; then 
-      echo "ERROR make install/local failed "
       exit 1
    fi
    if [ $AOMP_STANDALONE_BUILD == 1 ] ; then 

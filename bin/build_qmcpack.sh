@@ -40,6 +40,7 @@ thisdir=$(getdname $0)
 . $thisdir/aomp_common_vars
 # --- end standard header ----
 AOMP=${AOMP:-~/usr/lib/aomp}
+ROCM_VER=${ROCM_VER:-rocm-alt}
 
 if [ -e /etc/profile.d/modules.sh ] ; then
    source /etc/profile.d/modules.sh
@@ -48,7 +49,7 @@ if [ -e /etc/profile.d/modules.sh ] ; then
    module load gcc
    module load hdf5/1.10.1
    module load openblas
-   module load rocm-alt
+   module load $ROCM_VER
    BOOST_ROOT=${BOOST_ROOT:-/cm/shared/opt/boost/1.72.0}
    FFTW_HOME=${FFTW_HOME:-/cm/shared/apps/fftw/openmpi/gcc/64/3.3.8}
    OPENMPI_INSTALL=${OPENMPI_INSTALL:-~/openmpi-4.0.3-install}
@@ -61,7 +62,9 @@ else
    export BOOST_ROOT FFTW_HOME
 fi
 
-AOMP_GPU=${AOMP_GPU:-`$AOMP/bin/mygpu`}
+# Use function to set and test AOMP_GPU
+setaompgpu
+
 build_folder=build_AOMP_offload_real_MP_$AOMP_GPU
 QMCPACK_REPO=${QMCPACK_REPO:-$AOMP_REPOS_TEST/$AOMP_QMCPACK_REPO_NAME}
 export PATH=$OPENMPI_INSTALL/bin:$AOMP/bin:$PATH

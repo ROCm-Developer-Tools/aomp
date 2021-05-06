@@ -23,8 +23,12 @@ thisdir=$(getdname $0)
 [ ! -L "$0" ] || thisdir=$(getdname `readlink "$0"`)
 . $thisdir/aomp_common_vars
 # --- end standard header ----
-
+# Setup AOMP variables
 AOMP=${AOMP:-/usr/lib/aomp}
+
+# Use function to set and test AOMP_GPU
+setaompgpu
+
 AOMP_GPU=${AOMP_GPU:-`$AOMP/bin/mygpu`}
 PATH=$AOMP/bin:$PATH
 CXX=clang++

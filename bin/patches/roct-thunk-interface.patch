@@ -1,5 +1,5 @@
 diff --git a/src/fmm.c b/src/fmm.c
-index d3f2897..7737385 100644
+index 172c1dc..20437ee 100644
 --- a/src/fmm.c
 +++ b/src/fmm.c
 @@ -1491,8 +1491,11 @@ static int bind_mem_to_numa(uint32_t node_id, void *mem,
@@ -16,7 +16,7 @@ index d3f2897..7737385 100644
  	r = mbind(mem, SizeInBytes, mode, node_mask->maskp, num_node + 1, 0);
  	numa_bitmask_free(node_mask);
 diff --git a/src/topology.c b/src/topology.c
-index 36ef987..3d7e1b6 100644
+index 7c3f47d..ea3fcc7 100644
 --- a/src/topology.c
 +++ b/src/topology.c
 @@ -1,5 +1,6 @@
@@ -43,7 +43,7 @@ index 36ef987..3d7e1b6 100644
  };
  
  static HSAKMT_STATUS topology_take_snapshot(void);
-@@ -445,6 +448,13 @@ static int get_cpu_cache_info(const char *prefix, struct proc_cpuinfo *cpuinfo,
+@@ -450,6 +453,13 @@ static int get_cpu_cache_info(const char *prefix, struct proc_cpuinfo *cpuinfo,
  	int idx, num_idx, n;
  	HsaCacheProperties *this_cache;
  	char path[256], str[256];
@@ -57,7 +57,7 @@ index 36ef987..3d7e1b6 100644
  
  	this_cache = cpu_ci->cache_prop;
  	num_idx = cpu_ci->num_caches;
-@@ -452,18 +462,31 @@ static int get_cpu_cache_info(const char *prefix, struct proc_cpuinfo *cpuinfo,
+@@ -457,18 +467,31 @@ static int get_cpu_cache_info(const char *prefix, struct proc_cpuinfo *cpuinfo,
  		/* If this cache is shared by multiple CPUs, we only need
  		 * to list it in the first CPU.
  		 */
@@ -100,7 +100,7 @@ index 36ef987..3d7e1b6 100644
  
  		/* CacheLevel */
  		snprintf(path, 256, "%s/index%d/level", prefix, idx);
-@@ -815,6 +838,8 @@ static int topology_search_processor_vendor(const char *processor_name)
+@@ -819,6 +842,8 @@ static int topology_search_processor_vendor(const char *processor_name)
  	for (i = 0; i < ARRAY_LEN(supported_processor_vendor_name); i++) {
  		if (!strcmp(processor_name, supported_processor_vendor_name[i]))
  			return i;
@@ -109,7 +109,7 @@ index 36ef987..3d7e1b6 100644
  	}
  	return -1;
  }
-@@ -847,6 +872,52 @@ static HSAKMT_STATUS topology_parse_cpuinfo(struct proc_cpuinfo *cpuinfo,
+@@ -851,6 +876,52 @@ static HSAKMT_STATUS topology_parse_cpuinfo(struct proc_cpuinfo *cpuinfo,
  		return HSAKMT_STATUS_ERROR;
  	}
  
@@ -162,7 +162,7 @@ index 36ef987..3d7e1b6 100644
  	/* Each line in /proc/cpuinfo that read_buf is constructed, the format
  	 * is like this:
  	 * "token       : value\n"
-@@ -895,6 +966,7 @@ static HSAKMT_STATUS topology_parse_cpuinfo(struct proc_cpuinfo *cpuinfo,
+@@ -900,6 +971,7 @@ static HSAKMT_STATUS topology_parse_cpuinfo(struct proc_cpuinfo *cpuinfo,
  			cpuinfo[proc].apicid = atoi(p);
  		}
  	}
@@ -170,7 +170,7 @@ index 36ef987..3d7e1b6 100644
  
  	if (processor_vendor < 0) {
  		pr_err("Failed to get Processor Vendor. Setting to %s",
-@@ -1205,7 +1277,13 @@ static int topology_create_temp_cpu_cache_list(int node,
+@@ -1218,7 +1290,13 @@ static int topology_create_temp_cpu_cache_list(int node,
  	*temp_cpu_ci_list = NULL;
  
  	/* Get info from /sys/devices/system/node/nodeX/cpuY/cache */
@@ -185,7 +185,7 @@ index 36ef987..3d7e1b6 100644
  	/* Other than cpuY folders, this dir also has cpulist and cpumap */
  	max_cpus = num_subdirs(node_dir, "cpu");
  	if (max_cpus <= 0) {
-@@ -1239,7 +1317,7 @@ static int topology_create_temp_cpu_cache_list(int node,
+@@ -1252,7 +1330,7 @@ static int topology_create_temp_cpu_cache_list(int node,
  			continue;
  		if (!isdigit(dir->d_name[3])) /* ignore files like cpulist */
  			continue;

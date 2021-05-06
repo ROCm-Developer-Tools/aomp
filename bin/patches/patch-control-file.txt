@@ -4,3 +4,5 @@ openlibm: openlibm.patch
 opencl-on-vdi: ocl.patch
 RAJA: raja.patch
 RAJAPerf: rajaperf.patch
+rocr-runtime: rocr-runtime.patch
+roct-thunk-interface: roct-thunk-interface.patch

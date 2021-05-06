@@ -1,12 +1,17 @@
 include ../Makefile.defs
-$(warning "This test requires rocblas to be installed in /opt/rocm/rocblas. Rocblas works on AMD only.")
+$(warning "Warning: This test requires rocBLAS(AMD Only) to be installed in /opt/rocm-X.Y.Z/rocblas.")
 
 TESTNAME     = hip_rocblas
 TESTSRC_MAIN = hip_rocblas.cpp
 TESTSRC_AUX  =
 TESTSRC_ALL  = $(TESTSRC_MAIN) $(TESTSRC_AUX)
 OMP_FLAGS    =  --offload-arch=${AOMP_GPU}
-AOMPROCM ?= /opt/rocm
+NEWEST_ROCM ?= $(shell ls /opt | grep -oP "rocm-[0-9].[0-9].[0-9]" | tail -1)
+ifeq ($(NEWEST_ROCM),)
+	$(error "Error: No ROCm detected!")
+endif
+AOMPROCM ?= /opt/$(NEWEST_ROCM)
+$(warning "AOMPROCM = $(AOMPROCM)")
 CFLAGS       = -x hip -I $(AOMPROCM)/rocblas/include/ --offload-arch=${AOMP_GPU} -std=c++11
 AOMPHIP ?= $(AOMP)
 VERS = $(shell $(AOMP)/bin/clang --version | grep -oP '(?<=clang version )[0-9.]+')

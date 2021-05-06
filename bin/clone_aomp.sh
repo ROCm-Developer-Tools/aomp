@@ -188,9 +188,11 @@ if [ "$AOMP_BUILD_DEBUG" == "1" ] ; then
    reponame=$AOMP_TRACE_REPO_NAME
    repogitname=$AOMP_TRACE_REPO_NAME
    COBRANCH=$AOMP_TRACE_REPO_BRANCH
+   COSHAKEY=$AOMP_TRACE_REPO_SHA
    clone_or_pull
    reponame=$AOMP_PROF_REPO_NAME
    repogitname=$AOMP_PROF_REPO_NAME
    COBRANCH=$AOMP_PROF_REPO_BRANCH
+   COSHAKEY=$AOMP_PROF_REPO_SHA
    clone_or_pull
 fi
