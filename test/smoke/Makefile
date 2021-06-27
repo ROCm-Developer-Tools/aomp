@@ -93,6 +93,7 @@ TESTS_DIR = \
     issue_flang_libomp \
     issue_001 \
     issue_002 \
+    kmpc_alloc \
     kokkos_log2 \
     launch_latency \
     liba_bundled \
