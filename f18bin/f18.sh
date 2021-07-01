@@ -8,7 +8,7 @@
 #
 PROGVERSION="X.Y-Z"
 #
-# Copyright (c) 2020 ADVANCED MICRO DEVICES, INC.  
+# Copyright (c) 2021 ADVANCED MICRO DEVICES, INC.
 # 
 # AMD is granting you permission to use this software and documentation (if any) (collectively, the 
 # Materials) pursuant to the terms and conditions of the Software License Agreement included with the 
@@ -286,8 +286,8 @@ rc=0
 
 
 # Set extra libs that may be needed
-EXTRA_LIBS="-L /usr/local/lib -lpgmath"
-EXTRA_LIBS=""
+EXTRA_LIBS="-L $HOME/rocm/aomp/lib -lpgmath"
+# EXTRA_LIBS=""
 BBC_ARGS="-module-suffix .f18.mod -intrinsic-module-directory $F18/include/flang $EXTRA_BBC_ARGS"
 
 # For firdev developers only
@@ -355,60 +355,8 @@ for __input_file in `echo $INPUTFILES` ; do
 done
 
 if [ ! $GEN_OBJECT_ONLY ] ; then
-   # Create c Main program
-   mymainc=$TMPDIR/mymain.c
-   mymaino=$TMPDIR/mymain.o
-   if [ $DRYRUN ] ; then
-      echo "cat >$mymainc <<EOF"
-      cat <<EOF 
-#include <stdio.h> 
-extern void _FortranAStopStatement(int, char, char);
-extern void _FortranAProgramStart(int argc, const char *argv[], const char *envp[]);
-void _QQmain();
-int main(int argc, const char *argv[], const char *envp[]){
-   _FortranAProgramStart(argc, argv, envp);
-   _QQmain();
-   _FortranAStopStatement(0, (char) 0, (char) 1); 
-} 
-EOF
-      echo "EOF"
-   else
-      if [ $VERBOSE ] ; then # CREATE A VERBOSE c MAIN
-         cat >$mymainc <<EOF 
-#include <stdio.h> 
-extern void _FortranAStopStatement(int, char, char);
-extern void _FortranAProgramStart(int argc, const char *argv[], const char *envp[]);
-void _QQmain();
-int main(int argc, const char *argv[], const char *envp[]){
-   printf("cmain calling _FortranAProgramStart()\n");
-   _FortranAProgramStart(argc, argv, envp);
-   printf("cmain calling _QQmain\n");
-   _QQmain();
-   printf("cmain calling _FortranAStopStatement\n");
-   _FortranAStopStatement(0, (char) 0, (char) 1); 
-} 
-EOF
-      else # CREATE c MAIN
-         cat >$mymainc <<EOF 
-#include <stdio.h> 
-extern void _FortranAStopStatement(int, char, char);
-extern void _FortranAProgramStart(int argc, const char *argv[], const char *envp[]);
-void _QQmain();
-int main(int argc, const char *argv[], const char *envp[]){
-   _FortranAProgramStart(argc, argv, envp);
-   _QQmain();
-   _FortranAStopStatement(0, (char) 0, (char) 1); 
-} 
-EOF
-      fi
-   fi
-   [ $VV ] && echo 
-   [ $VERBOSE ] && echo "#Step:  Create and compile  C main"
-   runcmd "$F18CC $VFLAG -c $mymainc -o $mymaino"
-   [ $VV ] && echo 
    [ $VERBOSE ] && echo "#Step:  Link objects with c main to create $OUTFILE"
-   runcmd "$F18CXX $VFLAG -no-pie -L $F18LIB -lFortranRuntime $objfilelist $mymaino -lFortranRuntime -lFortranDecimal $EXTRA_LIBS -o $OUTFILE"
-
+   runcmd "$F18CXX $VFLAG -no-pie -L $F18LIB -lFortranRuntime $objfilelist $mymaino -lFortranRuntime -lFortranDecimal -lFortran_main $EXTRA_LIBS -o $OUTFILE"
 fi
 
 do_err 0
