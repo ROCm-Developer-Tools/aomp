@@ -1,0 +1,8 @@
+
+An illustration how to compile multiple source files. Vector addition and multiplication executed in target parallel regions.
+
+To compile and run:
+make run
+
+For help:
+make help

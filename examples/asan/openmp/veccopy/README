@@ -1,0 +1,8 @@
+
+An illustration of simple vector copying executed in target parallel region
+
+To compile and run:
+make run
+
+For help:
+make help
